@@ -569,7 +569,7 @@ class DatabricksJobRunner:
 
     def retrieve_logs_for_run_id(
         self, log: logging.Logger, databricks_run_id: int
-    ) -> Optional[Tuple[Optional[str], Optional[str]]]:
+    ) -> Optional[tuple[Optional[str], Optional[str]]]:
         """Retrieve the stdout and stderr logs for a run."""
         run = self.client.workspace_client.jobs.get_run(databricks_run_id)
         # Run.cluster_instance can be None. In that case, fall back to cluster instance on first

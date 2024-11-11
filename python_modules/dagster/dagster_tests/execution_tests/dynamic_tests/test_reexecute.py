@@ -168,7 +168,7 @@ def echo(x):
 
 
 @op
-def adder(ls: List[int]) -> int:
+def adder(ls: list[int]) -> int:
     return sum(ls)
 
 

@@ -112,10 +112,8 @@ def _metrics_polling_interval(
     except ValueError:
         if logger:
             logger.warning(
-                (
-                    "Invalid value for dagster/run_metrics_polling_interval_seconds tag."
-                    f"Setting metric polling interval to default value: {DEFAULT_RUN_METRICS_POLL_INTERVAL_SECONDS}."
-                )
+                "Invalid value for dagster/run_metrics_polling_interval_seconds tag."
+                f"Setting metric polling interval to default value: {DEFAULT_RUN_METRICS_POLL_INTERVAL_SECONDS}."
             )
         return DEFAULT_RUN_METRICS_POLL_INTERVAL_SECONDS
 

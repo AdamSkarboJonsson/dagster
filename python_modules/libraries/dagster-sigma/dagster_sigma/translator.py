@@ -34,7 +34,7 @@ class SigmaWorkbook:
     https://help.sigmacomputing.com/docs/workbooks
     """
 
-    properties: Dict[str, Any]
+    properties: dict[str, Any]
     datasets: AbstractSet[str]
     owner_email: Optional[str]
 
@@ -48,7 +48,7 @@ class SigmaDataset:
     https://help.sigmacomputing.com/docs/datasets
     """
 
-    properties: Dict[str, Any]
+    properties: dict[str, Any]
     columns: AbstractSet[str]
     inputs: AbstractSet[str]
 
@@ -56,11 +56,11 @@ class SigmaDataset:
 @whitelist_for_serdes
 @record
 class SigmaOrganizationData:
-    workbooks: List[SigmaWorkbook]
-    datasets: List[SigmaDataset]
+    workbooks: list[SigmaWorkbook]
+    datasets: list[SigmaDataset]
 
     @cached_method
-    def get_datasets_by_inode(self) -> Dict[str, SigmaDataset]:
+    def get_datasets_by_inode(self) -> dict[str, SigmaDataset]:
         return {_inode_from_url(dataset.properties["url"]): dataset for dataset in self.datasets}
 
 

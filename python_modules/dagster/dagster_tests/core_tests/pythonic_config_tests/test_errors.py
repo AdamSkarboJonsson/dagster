@@ -160,7 +160,7 @@ This config type can be a:
     ):
 
         @op
-        def my_op(config: Tuple[str, str]):
+        def my_op(config: tuple[str, str]):
             pass
 
     with pytest.raises(
@@ -178,7 +178,7 @@ This config type can be a:
     ):
 
         @asset
-        def my_asset(config: Tuple[str, str]):
+        def my_asset(config: tuple[str, str]):
             pass
 
 

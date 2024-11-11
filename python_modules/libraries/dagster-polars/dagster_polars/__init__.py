@@ -16,7 +16,7 @@ __all__ = [
 
 try:
     # provided by dagster-polars[delta]
-    from dagster_polars.io_managers.delta import DeltaWriteMode, PolarsDeltaIOManager  # noqa
+    from dagster_polars.io_managers.delta import DeltaWriteMode, PolarsDeltaIOManager
 
     __all__.extend(["DeltaWriteMode", "PolarsDeltaIOManager"])
 except ImportError:
@@ -26,8 +26,8 @@ except ImportError:
 try:
     # provided by dagster-polars[bigquery]
     from dagster_polars.io_managers.bigquery import (
-        PolarsBigQueryIOManager,  # noqa
-        PolarsBigQueryTypeHandler,  # noqa
+        PolarsBigQueryIOManager,
+        PolarsBigQueryTypeHandler,
     )
 
     __all__.extend(["PolarsBigQueryIOManager", "PolarsBigQueryTypeHandler"])

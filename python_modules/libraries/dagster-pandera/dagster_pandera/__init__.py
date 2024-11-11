@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     import pandera.polars  # noqa: TCH004
 
 DagsterPanderaSchema: TypeAlias = Union[pa.DataFrameSchema, "pandera.polars.DataFrameSchema"]
-DagsterPanderaSchemaModel: TypeAlias = Type[
+DagsterPanderaSchemaModel: TypeAlias = type[
     Union[pa.DataFrameModel, "pandera.polars.DataFrameModel"]
 ]
 DagsterPanderaColumn: TypeAlias = Union[pa.Column, "pandera.polars.Column"]
