@@ -385,6 +385,7 @@ SAMPLE_SUCCESS_MESSAGE = {"code": "Success", "message": "Operation performed."}
 TEST_ACCOUNT_ID = "test_account_id"
 TEST_API_KEY = "test_api_key"
 TEST_API_SECRET = "test_api_secret"
+TEST_ANOTHER_ACCOUNT_ID = "test_another_account_id"
 
 
 @pytest.fixture(name="connector_id")
