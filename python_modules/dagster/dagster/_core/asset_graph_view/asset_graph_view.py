@@ -18,6 +18,7 @@ from typing import (
 from dagster import _check as check
 from dagster._core.asset_graph_view.entity_subset import EntitySubset, _ValidatedEntitySubsetValue
 from dagster._core.asset_graph_view.serializable_entity_subset import SerializableEntitySubset
+from dagster._core.definitions.asset_graph_subset import AssetGraphSubset
 from dagster._core.definitions.asset_key import AssetCheckKey, AssetKey, EntityKey, T_EntityKey
 from dagster._core.definitions.events import AssetKeyPartitionKey
 from dagster._core.definitions.multi_dimensional_partitions import (
@@ -193,6 +194,13 @@ class AssetGraphView(LoadingContext):
         partitions_def = self._get_partitions_def(key)
         value = partitions_def.empty_subset() if partitions_def else False
         return EntitySubset(self, key=key, value=_ValidatedEntitySubsetValue(value))
+
+    def get_asset_subset_from_asset_graph_subset(
+        self, asset_graph_subset: AssetGraphSubset, asset_key: AssetKey
+    ) -> Optional[EntitySubset[AssetKey]]:
+        return self.get_subset_from_serializable_subset(
+            asset_graph_subset.get_asset_subset(asset_key, self.asset_graph)
+        )
 
     def get_subset_from_serializable_subset(
         self, serializable_subset: SerializableEntitySubset[T_EntityKey]
