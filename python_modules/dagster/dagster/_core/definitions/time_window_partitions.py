@@ -727,10 +727,19 @@ class TimeWindowPartitionsDefinition(PartitionsDefinition, IHaveNew):
                 break
         return result
 
+    def get_partition_subset_in_time_window(
+        self, time_window: TimeWindow
+    ) -> "TimeWindowPartitionsSubset":
+        return TimeWindowPartitionsSubset(
+            partitions_def=self, num_partitions=None, included_time_windows=[time_window]
+        )
+
     def get_partition_key_range_for_time_window(self, time_window: TimeWindow) -> PartitionKeyRange:
         start_partition_key = self.get_partition_key_for_timestamp(time_window.start.timestamp())
         end_partition_key = self.get_partition_key_for_timestamp(
-            check.not_none(self.get_prev_partition_window(time_window.end)).start.timestamp()
+            check.not_none(
+                self.get_prev_partition_window(time_window.end, respect_bounds=False)
+            ).start.timestamp()
         )
 
         return PartitionKeyRange(start_partition_key, end_partition_key)
