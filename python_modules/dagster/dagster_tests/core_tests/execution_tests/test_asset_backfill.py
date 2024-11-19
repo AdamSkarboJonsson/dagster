@@ -37,6 +37,10 @@ from dagster import (
     multi_asset,
 )
 from dagster._core.asset_graph_view.asset_graph_view import AssetGraphView, TemporalContext
+from dagster._core.asset_graph_view.bfs import (
+    AssetGraphViewBfsFilterConditionResult,
+    bfs_filter_asset_graph_view,
+)
 from dagster._core.definitions.asset_graph_subset import AssetGraphSubset
 from dagster._core.definitions.base_asset_graph import BaseAssetGraph
 from dagster._core.definitions.decorators.repository_decorator import repository
@@ -523,11 +527,12 @@ def make_random_subset(
 
     asset_graph_view = _get_asset_graph_view(instance, asset_graph, evaluation_time=evaluation_time)
 
-    return asset_graph.bfs_filter_asset_partitions(
+    return bfs_filter_asset_graph_view(
         asset_graph_view=asset_graph_view,
         condition_fn=lambda candidate_asset_keys, candidate_subset_value, _: (
-            candidate_subset_value,
-            [],
+            AssetGraphViewBfsFilterConditionResult(
+                passed_subset_value=candidate_subset_value, excluded_subset_values_and_reasons=[]
+            )
         ),
         initial_asset_subset=AssetGraphSubset.from_asset_partition_set(
             root_asset_partitions, asset_graph
@@ -553,11 +558,12 @@ def make_subset_from_partition_keys(
 
     asset_graph_view = _get_asset_graph_view(instance, asset_graph, evaluation_time=evaluation_time)
 
-    return asset_graph.bfs_filter_asset_partitions(
+    return bfs_filter_asset_graph_view(
         asset_graph_view=asset_graph_view,
         condition_fn=lambda candidate_asset_keys, candidate_subset_value, _: (
-            candidate_subset_value,
-            [],
+            AssetGraphViewBfsFilterConditionResult(
+                passed_subset_value=candidate_subset_value, excluded_subset_values_and_reasons=[]
+            )
         ),
         initial_asset_subset=AssetGraphSubset.from_asset_partition_set(
             root_asset_partitions, asset_graph
@@ -630,11 +636,13 @@ def run_backfill_to_completion(
 
     asset_graph_view = _get_asset_graph_view(instance, asset_graph)
 
-    fail_and_downstream_asset_graph_subset, _ = asset_graph.bfs_filter_asset_partitions(
+    fail_and_downstream_asset_graph_subset, _ = bfs_filter_asset_graph_view(
         asset_graph_view=asset_graph_view,
-        condition_fn=lambda candidate_asset_keys, candidate_subset_value, _: (
-            candidate_subset_value,
-            [],
+        condition_fn=lambda candidate_asset_keys,
+        candidate_subset_value,
+        _: AssetGraphViewBfsFilterConditionResult(
+            passed_subset_value=candidate_subset_value,
+            excluded_subset_values_and_reasons=[],
         ),
         initial_asset_subset=AssetGraphSubset.from_asset_partition_set(
             set(fail_asset_partitions), asset_graph

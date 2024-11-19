@@ -21,6 +21,10 @@ from typing import (
 
 import dagster._check as check
 from dagster._core.asset_graph_view.asset_graph_view import AssetGraphView, TemporalContext
+from dagster._core.asset_graph_view.bfs import (
+    AssetGraphViewBfsFilterConditionResult,
+    bfs_filter_asset_graph_view,
+)
 from dagster._core.asset_graph_view.entity_subset import EntitySubset
 from dagster._core.asset_graph_view.serializable_entity_subset import (
     EntitySubsetValue,
@@ -1329,16 +1333,18 @@ def _get_failed_and_downstream_asset_partitions(
         asset_graph,
     )
 
-    failed_and_downstream_subset = asset_graph.bfs_filter_asset_partitions(
+    failed_and_downstream_subset = bfs_filter_asset_graph_view(
         asset_graph_view,
         lambda candidate_asset_keys, candidate_subset_value, _: (
-            _get_subset_in_target_subset(
-                asset_graph_view,
-                candidate_asset_keys,
-                candidate_subset_value,
-                asset_backfill_data.target_subset,
-            ),
-            [],
+            AssetGraphViewBfsFilterConditionResult(
+                passed_subset_value=_get_subset_in_target_subset(
+                    asset_graph_view,
+                    candidate_asset_keys,
+                    candidate_subset_value,
+                    asset_backfill_data.target_subset,
+                ),
+                excluded_subset_values_and_reasons=[],
+            )
         ),
         initial_asset_subset=failed_asset_graph_subset,
     )[0]
@@ -1483,7 +1489,7 @@ def execute_asset_backfill_iteration_inner(
         initial_candidates, asset_graph
     )
 
-    asset_subset_to_request, not_requested_and_reasons = asset_graph.bfs_filter_asset_partitions(
+    asset_subset_to_request, not_requested_and_reasons = bfs_filter_asset_graph_view(
         asset_graph_view,
         lambda candidate_asset_keys,
         candidate_subset_value,
@@ -1722,7 +1728,10 @@ def _should_backfill_atomic_asset_partitions_unit_with_subsets(
                 | filtered_out_subset
             )
 
-    return candidate_serializable_entity_subset, failure_subsets_with_reasons
+    return (
+        candidate_serializable_entity_subset,
+        failure_subsets_with_reasons,
+    )
 
 
 def get_can_run_with_parent_subsets(
@@ -1891,7 +1900,7 @@ def should_backfill_atomic_asset_partitions_unit_with_subsets(
     requested_subset: AssetGraphSubset,
     materialized_subset: AssetGraphSubset,
     failed_and_downstream_subset: AssetGraphSubset,
-) -> Tuple[EntitySubsetValue, Iterable[Tuple[EntitySubsetValue, str]]]:
+) -> AssetGraphViewBfsFilterConditionResult:
     final_failure_subsets_with_reasons = []
     for candidate_asset_key in candidate_asset_keys:
         candidate_serializable_entity_subset = SerializableEntitySubset(
@@ -1915,7 +1924,10 @@ def should_backfill_atomic_asset_partitions_unit_with_subsets(
         if candidate_serializable_entity_subset.is_empty:
             break
 
-    return candidate_subset_value, final_failure_subsets_with_reasons
+    return AssetGraphViewBfsFilterConditionResult(
+        passed_subset_value=candidate_subset_value,
+        excluded_subset_values_and_reasons=final_failure_subsets_with_reasons,
+    )
 
 
 def _get_failed_asset_partitions(
