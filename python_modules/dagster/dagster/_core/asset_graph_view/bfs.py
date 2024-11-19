@@ -12,11 +12,9 @@ from dagster._core.definitions.asset_graph_subset import AssetGraphSubset
 from dagster._core.definitions.asset_key import AssetKey
 from dagster._core.definitions.base_asset_graph import BaseAssetGraph
 from dagster._core.definitions.time_window_partitions import get_time_partitions_def
-from dagster._record import record
 
 
-@record
-class AssetGraphViewBfsFilterConditionResult:
+class AssetGraphViewBfsFilterConditionResult(NamedTuple):
     passed_subset_value: EntitySubsetValue
     excluded_subset_values_and_reasons: Sequence[Tuple[EntitySubsetValue, str]]
 
@@ -29,23 +27,28 @@ def bfs_filter_asset_graph_view(
     ],
     initial_asset_subset: "AssetGraphSubset",
 ) -> Tuple[AssetGraphSubset, Sequence[Tuple[AssetGraphSubset, str]]]:
-    """Returns asset partitions within the graph that satisfy supplied criteria.
+    """Returns the subset of the graph that satisfy supplied criteria.
 
-    - Are >= initial_asset_partitions
+    - Are >= initial_asset_subset
     - Match the condition_fn
     - Any of their ancestors >= initial_asset_partitions match the condition_fn
 
-    Also returns a list of tuples, where each tuple is a candidated_unit (list of
-    AssetKeyPartitionKeys that must be materialized together - ie multi_asset) that do not
-    satisfy the criteria and the reason they were filtered out.
+    Also returns a list of tuples, where each tuple is an asset subset that did not
+    satisfy the condition and the reason they were filtered out.
 
-    The condition_fn should return a tuple of a boolean indicating whether the asset partition meets
-    the condition and a string explaining why it does not meet the condition, if applicable.
+    The condition_fn takes in:
+    - a set of asset keys. If there is more than one, the asset keys are part of the same
+    execution set (i.e. non-subsettable multi-asset)
+    - The EntitySubsetValue representing the partitions being evaluated for those key(s) for
+    the condition.
+    - An AssetGraphSubset for the portion of the graph that has so far been visited and passed
+    the condition.
+
+    The condition_fn should return a object with an EntitySubsetValue indicating the partitions
+    that passed the condition for the suppleid asset keys, and a list of (EntitySubsetValue, str)
+    tuples with more information about why certain subsets were excluded.
 
     Visits parents before children.
-
-    When asset partitions are part of the same execution set (non-subsettable multi-asset),
-    they're provided all at once to the condition_fn.
     """
     initial_subsets = list(
         initial_asset_subset.iterate_asset_subsets(asset_graph=asset_graph_view.asset_graph)
@@ -65,8 +68,8 @@ def bfs_filter_asset_graph_view(
 
     while len(queue) > 0:
         candidate_keys, candidate_subset_value = queue.dequeue()
-
         condition_result = condition_fn(candidate_keys, candidate_subset_value, result)
+
         subset_that_meets_condition = condition_result.passed_subset_value
         fail_reasons = condition_result.excluded_subset_values_and_reasons
 
@@ -92,6 +95,7 @@ def bfs_filter_asset_graph_view(
                     asset_graph_view.get_subset_from_serializable_subset(candidate_subset_value)
                 )
 
+                # Add any child subsets that have not yet been visited to the queue
                 for child_key in asset_graph.get(candidate_key).child_keys:
                     child_subset = asset_graph_view.compute_child_subset(
                         child_key, matching_entity_subset

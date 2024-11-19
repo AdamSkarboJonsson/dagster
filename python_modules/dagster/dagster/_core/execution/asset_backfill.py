@@ -1348,6 +1348,7 @@ def _get_failed_and_downstream_asset_partitions(
         ),
         initial_asset_subset=failed_asset_graph_subset,
     )[0]
+
     return failed_and_downstream_subset
 
 
@@ -1669,18 +1670,18 @@ def _should_backfill_atomic_asset_partitions_unit_with_subsets(
                 f"Could not load subset for candidate entity subset {candidate_entity_subset} - asset may have been removed or the underlying partitions definition may have changed"
             )
 
-        parent_subset, required_but_nonexistent_parent_subset = (
-            asset_graph_view.compute_parent_subset_and_required_but_not_existent_parent_subset(
+        parent_subset, required_but_nonexistent_partition_keys = (
+            asset_graph_view.compute_parent_subset_and_required_but_nonexistent_partition_keys(
                 parent_key,
                 candidate_entity_subset,
             )
         )
 
-        if required_but_nonexistent_parent_subset:
+        if required_but_nonexistent_partition_keys:
             raise DagsterInvariantViolationError(
                 f"Asset partition subset {candidate_entity_subset}"
                 " depends on invalid partition keys"
-                f" {required_but_nonexistent_parent_subset.get_internal_subset_value()}"
+                f" {required_but_nonexistent_partition_keys}"
             )
         # Children with parents that are targeted but not materialized are eligible
         # to be filtered out if the parent
