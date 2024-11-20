@@ -2,11 +2,9 @@
 
 ## 1.9.3 (core) / 0.25.3 (libraries)
 
-(Thanks, [@]()!)
-
 ### New
 
-- Added `run_id` to the `run_tags` index to imrpove database performance. Run `dagster instance migrate` to update the index. (Thanks, [@HynekBlaha](https://github.com/HynekBlaha)!)
+- Added `run_id` to the `run_tags` index to improve database performance. Run `dagster instance migrate` to update the index. (Thanks, [@HynekBlaha](https://github.com/HynekBlaha)!)
 - Added icons for `kind` tags: Cassandra, ClickHouse, CockroachDB, Doris, Druid, Elasticsearch, Flink, Hadoop, Impala, Kafka, MariaDB, MinIO, Pinot, Presto, Pulsar, RabbitMQ, Redis, Redpanda, ScyllaDB, Starrocks, Superset. (Thanks, [@swrookie](https://github.com/swrookie)!)
 - Added a new icon for the Denodo kind tag. (Thanks, [@tintamarre](https://github.com/tintamarre)!)
 - Errors raised from defining more than one `Definitions` object at module scope now include the object names so that the source is easier to determine.
@@ -22,6 +20,7 @@
 - [dagster-sigma] Added support for direct workbook to warehouse table dependencies.
 - [dagster-sigma] Added `include_unused_datasets` field to `SigmaFilter` to disable pulling datasets that aren't used by a downstream workbook.
 - [dagster-sigma] Added `skip_fetch_column_data` option to skip loading Sigma column lineage. This can speed up loading large instances.
+- [dagster-sigma] Introduced an experimental `dagster-sigma snapshot` command, allowing Sigma workspaces to be captured to a file for faster subsequent loading.
 
 ### Bugfixes
 
@@ -33,17 +32,16 @@
 - [ui] Fixed "Open in Launchpad" button when testing a schedule or sensor by ensuring that it opens to the correct deployment.
 - [ui] Fixed an issue where switching a user setting was immediately saved, rather than waiting for the change to be confirmed.
 - [dagster-looker] Unions without unique/distinct criteria are now properly handled.
+- [dagster-powerbi] Fixed an issue where reports without an upstream dataset dependency would fail to translate to an asset spec.
 - [dagster-sigma] Fixed an issue where API fetches did not paginate properly.
 
 ### Documentation
 
+- Added an [Airflow Federation Tutorial](https://docs.dagster.io/integrations/airlift/federation-tutorial/overview).
 - Added `dagster-dingtalk` to the list of [community supported libraries](https://docs.dagster.io/integrations#community-supported-libraries).
 - Fixed typos in the `dagster-wandb` (Weights and Biases) documentation. (Thanks, [@matt-weingarten](https://github.com/matt-weingarten)!)
-- Updated the RBAC documentation.
-
-### Breaking Changes
-
-### Deprecations
+- Updated the [Role-based Access Control (RBAC)](https://docs.dagster.io/dagster-plus/account/managing-users/managing-user-roles-permissions) documentation.
+- Added additional information about filtering to the [`dagster-sigma`](https://docs.dagster.io/integrations/sigma) documentation.
 
 ### Dagster Plus
 
